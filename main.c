@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <GLFW/glfw3.h>
 #include <math.h>
+#include <time.h>
 
 #define SCREENWIDTH 1920
 #define SCREENHEIGHT 1080
 #define MAPWIDTH 24
 #define MAPHEIGHT 24
+#define ROTSPEED 0.01
 
 float boxPositionX = MAPWIDTH;
 float boxPositionY = MAPHEIGHT;
@@ -15,10 +17,12 @@ double posX = 3, posY = 3;  //x and y start position
 double dirX = -1, dirY = 0; //initial direction vector
 double planeX = 0, planeY = 0.66; //the 2d raycaster version of camera plane
 
+/*
 double time = 0; //time of current frame
 double oldTime = 0; //time of previous frame
+*/
 
-int x = 0;
+int calcul = 0;
 
 int worldMap[MAPWIDTH][MAPHEIGHT]=
 {
@@ -32,11 +36,11 @@ int worldMap[MAPWIDTH][MAPHEIGHT]=
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -47,25 +51,6 @@ int worldMap[MAPWIDTH][MAPHEIGHT]=
   {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
-
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        switch (key) {
-            case GLFW_KEY_A:
-
-                break;
-            
-	    case GLFW_KEY_D:
-
-                break;
-            
-	    case GLFW_KEY_W:
-
-		break;
-	}
-    }
-}
 
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -80,8 +65,8 @@ void draw() {
 
 void update() {
 for(int x = 0; x < MAPWIDTH * MAPHEIGHT; x++){
-      double cameraX = 2 * x / MAPWIDTH - 1;
-      double rayDirX = dirX + planeX * cameraX;
+      double cameraX = 2 * x / SCREENWIDTH - 1;
+      double rayDirX = dirX + planeX * cameraX * 3;
       double rayDirY = dirY + planeY * cameraX;
 
       int mapX = posX;
@@ -140,24 +125,50 @@ for(int x = 0; x < MAPWIDTH * MAPHEIGHT; x++){
           mapY += stepY;
           side = 1;
         }
-        //Check if ray has hit a wall
-        if (worldMap[mapX][mapY] > 0) hit = 1;
 
-	if(side == 0) perpWallDist = (sideDistX - deltaDistX);
-	}
 
+	if (hit == 1) perpWallDist = (sideDistX - deltaDistX);
+
+        	}
 	
-	int lineHeight = SCREENHEIGHT / perpWallDist;
-	int drawStart = -lineHeight / 2 + SCREENHEIGHT / 2;
-        if(drawStart < 0)drawStart = 0;
-        int drawEnd = lineHeight / 2 - SCREENHEIGHT / 2;
-        if(drawEnd >= SCREENHEIGHT)drawEnd = SCREENHEIGHT - 1;
-	glBegin(GL_LINES);
-    	glVertex2f(x, drawStart); // Start point
-	glVertex2f(x, drawEnd);
-    	glEnd();
-	x++;
+
+
+	while (hit == 1) {
+	
+	calcul += 1;
+
+	if(calcul==SCREENWIDTH)calcul = 0;
+
+        // Calculate line height
+        int lineHeight = SCREENHEIGHT / perpWallDist;
+
+        // Calculate draw start and draw end
+        int drawStart = -lineHeight / 2 + SCREENHEIGHT / 2;
+        if (drawStart < 0) drawStart = 0;
+        int drawEnd = lineHeight / 2 + SCREENHEIGHT / 2;
+        if (drawEnd >= SCREENHEIGHT) drawEnd = SCREENHEIGHT - 1;
+
+        // Draw the line
+        glBegin(GL_LINES);
+        glVertex2f(calcul+1, drawStart); // Start point
+        glVertex2f(calcul+1, drawEnd);   // End point
+        glClear(GL_COLOR_BUFFER_BIT);
+	glEnd();
+	
+	double oldDirX = dirX;
+	
+	hit = 0;
+		}
+	
 	}
+
+	/*
+      dirX = dirX * cos(-ROTSPEED) - dirY * sin(-ROTSPEED);
+      dirY = oldDirX * sin(-ROTSPEED) + dirY * cos(-ROTSPEED);
+      double oldPlaneX = planeX;
+      planeX = planeX * cos(-ROTSPEED) - planeY * sin(-ROTSPEED);
+      planeY = oldPlaneX * sin(-ROTSPEED) + planeY * cos(-ROTSPEED);
+	*/
 }
 
 int main() {
@@ -167,7 +178,7 @@ if (!glfwInit()) {
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Box with Jumps Everywhere", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Raycaster", NULL, NULL);
     if (!window) {
         fprintf(stderr, "Failed to create GLFW window\n");
         glfwTerminate();
@@ -175,7 +186,6 @@ if (!glfwInit()) {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSetKeyCallback(window, keyCallback);
     glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
