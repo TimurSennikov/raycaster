@@ -126,10 +126,15 @@ for(int x = 0; x < MAPWIDTH * MAPHEIGHT; x++){
           side = 1;
         }
 
+	 if (worldMap[mapX][mapY] > 0) hit = 1;
+	
+	        if (side == 0) {
+            perpWallDist = fabs((mapX - posX + (1 - stepX) / 2) / rayDirX);
+        } else {
+            perpWallDist = fabs((mapY - posY + (1 - stepY) / 2) / rayDirY);
+        }
 
-	if (hit == 1) perpWallDist = (sideDistX - deltaDistX);
-
-        	}
+}
 	
 
 
