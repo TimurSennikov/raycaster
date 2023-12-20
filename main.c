@@ -2,12 +2,14 @@
 #include <GLFW/glfw3.h>
 #include <math.h>
 #include <time.h>
+#include <unistd.h>
 
 #define SCREENWIDTH 1920
 #define SCREENHEIGHT 1080
 #define MAPWIDTH 24
 #define MAPHEIGHT 24
 #define ROTSPEED 0.01
+#define MOVESPEED 1
 
 float boxPositionX = MAPWIDTH;
 float boxPositionY = MAPHEIGHT;
@@ -152,28 +154,66 @@ for(int x = 0; x < MAPWIDTH * MAPHEIGHT; x++){
         if (drawStart < 0) drawStart = 0;
         int drawEnd = lineHeight / 2 + SCREENHEIGHT / 2;
         if (drawEnd >= SCREENHEIGHT) drawEnd = SCREENHEIGHT - 1;
-
+	
+	if (worldMap[mapX][mapY] == 1) glColor3f(1.0f, 0.0f, 0.0f);
+	if (worldMap[mapX][mapY] == 2) glColor3f(0.0f, 1.0f, 0.0f);
+	if (worldMap[mapX][mapY] == 3) glColor3f(0.0f, 0.0f, 1.0f);
+	if (worldMap[mapX][mapY] == 4) glColor3f(0.5f, 0.5f, 0.5f);
         // Draw the line
         glBegin(GL_LINES);
         glVertex2f(calcul+1, drawStart); // Start point
         glVertex2f(calcul+1, drawEnd);   // End point
-        glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f );
+//	glClearColor(1.0f, 0.0f, 0.0f, 1.0f );
+//	glClearColor(0.0f, 1.0f, 0.0f, 1.0f );
+//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f );
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnd();
 	
-	double oldDirX = dirX;
-	
+	sleep(0.5);
+
 	hit = 0;
 		}
 	
 	}
 
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
 	/*
+	if (key == GLFW_KEY_W){
+	      if(worldMap[posX + dirX * MOVESPEED][posY] == 0) posX += dirX * MOVESPEED;
+	      if(worldMap[posX][posY + dirY * MOVESPEED] == 0) posY += dirY * MOVESPEED;
+	}
+	
+	if (key == GLFW_KEY_W){
+              if(worldMap[posX + dirX * MOVESPEED][posY] == 0) posX -= dirX * MOVESPEED;
+              if(worldMap[posX][posY + dirY * MOVESPEED] == 0) posY -= dirY * MOVESPEED;
+        }
+
+	*/
+
+	if (key == GLFW_KEY_A && action == GLFW_PRESS){
+      double oldDirX = dirX;
       dirX = dirX * cos(-ROTSPEED) - dirY * sin(-ROTSPEED);
       dirY = oldDirX * sin(-ROTSPEED) + dirY * cos(-ROTSPEED);
       double oldPlaneX = planeX;
       planeX = planeX * cos(-ROTSPEED) - planeY * sin(-ROTSPEED);
       planeY = oldPlaneX * sin(-ROTSPEED) + planeY * cos(-ROTSPEED);
-	*/
+	}
+	
+	if (key == GLFW_KEY_D && action == GLFW_PRESS){
+      double oldDirX = dirX;
+      dirX = dirX * cos(-ROTSPEED) + dirY * sin(-ROTSPEED);
+      dirY = oldDirX * sin(-ROTSPEED) - dirY * cos(-ROTSPEED);
+      double oldPlaneX = planeX;
+      planeX = planeX * cos(-ROTSPEED) + planeY * sin(-ROTSPEED);
+      planeY = oldPlaneX * sin(-ROTSPEED) - planeY * cos(-ROTSPEED);
+        }
+
+
 }
 
 int main() {
@@ -193,6 +233,7 @@ if (!glfwInit()) {
     glfwMakeContextCurrent(window);
     glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
     glMatrixMode(GL_PROJECTION);
+    glfwSetKeyCallback(window, key_callback);
     glLoadIdentity();
     glOrtho(0, SCREENWIDTH, SCREENHEIGHT, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
