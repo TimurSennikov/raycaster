@@ -1,0 +1,15 @@
+TODO
+
+ planned:
+
+	!!!MAKE THE RAYCASTER WORK!!!
+
+ working:
+
+	camera and beams movement & rotation
+
+ done:
+	map
+	player and beams
+	basic 2d shapes
+	raycast beams rendering
