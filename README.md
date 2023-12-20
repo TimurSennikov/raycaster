@@ -16,6 +16,15 @@ if you can fix code errors, please text me in telegram @gentoolinuxuser
 
  done:
 	map
+ 
 	player and beams
+ 
 	basic 2d shapes
+ 
 	raycast beams rendering
+
+
+
+
+
+ 
